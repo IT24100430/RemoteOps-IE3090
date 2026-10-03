@@ -119,6 +119,41 @@ int receive_line(int socket_fd, char *buffer, size_t buffer_size)
 
 
 /* =========================================================
+   LOGGING
+   ========================================================= */
+
+#define LOG_FILE "remoteops_IT24100430.log"
+
+void write_log(const char *event)
+{
+    FILE *log_file = fopen(LOG_FILE, "a");
+
+    if (log_file == NULL)
+    {
+        return;
+    }
+
+    time_t now = time(NULL);
+    struct tm *local_time = localtime(&now);
+
+    if (local_time != NULL)
+    {
+        fprintf(log_file,
+                "[%04d-%02d-%02d %02d:%02d:%02d] %s\n",
+                local_time->tm_year + 1900,
+                local_time->tm_mon + 1,
+                local_time->tm_mday,
+                local_time->tm_hour,
+                local_time->tm_min,
+                local_time->tm_sec,
+                event);
+    }
+
+    fclose(log_file);
+}
+
+
+/* =========================================================
    SYSINFO VALUES
    ========================================================= */
 
@@ -749,6 +784,7 @@ void *handle_client(void *arg)
                           "OK AUTHENTICATED SID:0340\n");
 
             printf("Authentication successful.\n");
+            write_log("AUTH successful");
         }
 
         /* SYSINFO */
@@ -986,6 +1022,7 @@ void *handle_client(void *arg)
 
 int main(void)
 {
+    write_log("Agent started");
     int server_fd;
 
     struct sockaddr_in server_addr;
@@ -1093,6 +1130,8 @@ int main(void)
             perror("accept");
             continue;
         }
+
+        write_log("Controller connected");
 
         ClientData *client_data =
             malloc(sizeof(ClientData));
