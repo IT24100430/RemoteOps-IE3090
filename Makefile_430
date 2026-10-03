@@ -1,0 +1,15 @@
+CC = gcc
+CFLAGS = -Wall -Wextra
+PTHREAD = -pthread
+
+all: agent controller
+
+agent: agent_430.c
+	$(CC) $(CFLAGS) agent_430.c -o agent_430 $(PTHREAD)
+
+controller: controller_430.c
+	$(CC) $(CFLAGS) controller_430.c -o controller_430
+
+clean:
+	rm -f agent_430 controller_430
+
