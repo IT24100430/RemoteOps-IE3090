@@ -113,11 +113,6 @@ int upload_file(int sock, const char *filename)
              filename,
              file_size);
 
-    /*
-     * New protocol:
-     * PUT header followed immediately by raw bytes.
-     */
-
     if (send_all(sock, command, strlen(command)) < 0) {
         fclose(fp);
         return -1;
@@ -128,12 +123,29 @@ int upload_file(int sock, const char *filename)
     char buffer[BUFFER_SIZE];
     size_t bytes_read;
 
+    struct timespec start_time, end_time;
+    double elapsed_seconds, throughput;
+
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
+
     while ((bytes_read = fread(buffer, 1, sizeof(buffer), fp)) > 0) {
 
         if (send_all(sock, buffer, bytes_read) < 0) {
             fclose(fp);
             return -1;
         }
+    }
+
+    clock_gettime(CLOCK_MONOTONIC, &end_time);
+
+    elapsed_seconds =
+        (end_time.tv_sec - start_time.tv_sec) +
+        (end_time.tv_nsec - start_time.tv_nsec) / 1000000000.0;
+
+    if (elapsed_seconds > 0.0)
+    {
+        throughput = file_size / elapsed_seconds;
+        printf("PUT throughput: %.2f bytes/sec\n", throughput);
     }
 
     fclose(fp);
@@ -202,6 +214,11 @@ int download_file(int sock,
 
     long long remaining = file_size;
 
+    struct timespec start_time, end_time;
+    double elapsed_seconds, throughput;
+
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
+
     while (remaining > 0) {
 
         size_t chunk_size;
@@ -219,6 +236,18 @@ int download_file(int sock,
         fwrite(buffer, 1, chunk_size, fp);
 
         remaining -= chunk_size;
+    }
+
+    clock_gettime(CLOCK_MONOTONIC, &end_time);
+
+    elapsed_seconds =
+        (end_time.tv_sec - start_time.tv_sec) +
+        (end_time.tv_nsec - start_time.tv_nsec) / 1000000000.0;
+
+    if (elapsed_seconds > 0.0)
+    {
+        throughput = file_size / elapsed_seconds;
+        printf("GET throughput: %.2f bytes/sec\n", throughput);
     }
 
     fclose(fp);
