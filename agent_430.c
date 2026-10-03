@@ -1171,7 +1171,15 @@ int main(void)
             continue;
         }
 
-        write_log("Controller connected");
+        char client_info[128];
+
+snprintf(client_info,
+         sizeof(client_info),
+         "Controller connected: %s:%d",
+         inet_ntoa(client_addr.sin_addr),
+         ntohs(client_addr.sin_port));
+
+write_log(client_info);
 
         ClientData *client_data =
             malloc(sizeof(ClientData));
