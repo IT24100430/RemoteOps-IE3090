@@ -554,6 +554,16 @@ void handle_put(int client_fd,
     printf("PUT completed: %s (%lld bytes)\n",
            filename,
            file_size);
+
+    char log_message[512];
+
+    snprintf(log_message,
+             sizeof(log_message),
+             "File upload: %s (%lld bytes)",
+             filename,
+             file_size);
+
+    write_log(log_message);
 }
 
 /* =========================================================
@@ -662,6 +672,16 @@ void handle_get(int client_fd,
     printf("GET completed: %s (%lld bytes)\n",
            filename,
            file_size);
+
+    char log_message[512];
+
+    snprintf(log_message,
+             sizeof(log_message),
+             "File download: %s (%lld bytes)",
+             filename,
+             file_size);
+
+    write_log(log_message);
 }
 
 /* =========================================================
@@ -772,6 +792,20 @@ void *handle_client(void *arg)
 
         printf("Received: %s",
                buffer);
+
+        if (strcmp(buffer, "AUTH OPS-0430\\n") != 0)
+        {
+            char log_message[LINE_BUFFER_SIZE + 20];
+
+            snprintf(log_message,
+                     sizeof(log_message),
+                     "Command: %s",
+                     buffer);
+
+            log_message[strcspn(log_message, "\n")] = '\0';
+
+            write_log(log_message);
+        }
 
         /* AUTH */
 
