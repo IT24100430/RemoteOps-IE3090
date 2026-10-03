@@ -787,6 +787,12 @@ void *handle_client(void *arg)
                          buffer,
                          sizeof(buffer)) < 0)
         {
+            monitoring = 0;
+
+            write_log("Controller disconnected");
+
+            printf("Controller disconnected.\n");
+
             break;
         }
 
