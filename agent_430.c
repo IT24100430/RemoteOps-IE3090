@@ -88,6 +88,36 @@ int recv_all(int socket_fd, void *data, size_t length)
     return 0;
 }
 
+int receive_line(int socket_fd, char *buffer, size_t buffer_size)
+{
+    size_t i = 0;
+
+    while (i < buffer_size - 1)
+    {
+        char ch;
+        ssize_t received = recv(socket_fd, &ch, 1, 0);
+
+        if (received <= 0)
+            return -1;
+
+        if (ch == '\n')
+        {
+            buffer[i++] = '\n';
+            buffer[i] = '\0';
+            return 0;
+        }
+
+        if (ch != '\r')
+        {
+            buffer[i++] = ch;
+        }
+    }
+
+    buffer[buffer_size - 1] = '\0';
+    return -1;
+}
+
+
 /* =========================================================
    SYSINFO VALUES
    ========================================================= */
@@ -698,18 +728,12 @@ void *handle_client(void *arg)
                0,
                sizeof(buffer));
 
-        ssize_t bytes_received =
-            recv(client_fd,
-                 buffer,
-                 sizeof(buffer) - 1,
-                 0);
-
-        if (bytes_received <= 0)
+        if (receive_line(client_fd,
+                         buffer,
+                         sizeof(buffer)) < 0)
         {
             break;
         }
-
-        buffer[bytes_received] = '\0';
 
         printf("Received: %s",
                buffer);
