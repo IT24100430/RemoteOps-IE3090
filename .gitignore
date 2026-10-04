@@ -1,5 +1,6 @@
-agent_430
-controller_430
-agent_430_backup.c
-downloaded_testfile.txt
-*.log
+IE3090_IT24100430.zip
+*_backup_*.c
+agentfiles/
+test_concurrency
+test_concurrency.c
+validation_tests_IT24100430.txt
